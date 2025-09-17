@@ -7,6 +7,27 @@ from tensorflow.keras.preprocessing.image import img_to_array
 
 st.set_page_config(page_title="OCT AI Demo", layout="wide")
 
+# Keras3에서 자주 필요한 커스텀 객체들 (필요시 여기에 계속 추가)
+CUSTOM_OBJECTS = {
+    "swish": tf.nn.swish,          # EfficientNet 계열에서 흔함
+    "gelu": tf.nn.gelu,            # 일부 모델에서 사용
+    "FixedDropout": tf.keras.layers.Dropout,  # 옛 efficientnet에서 쓰던 래퍼 대체
+}
+
+def robust_load(path: str):
+    # 1) 가장 기본: compile=False (옵티마/손실 직렬화 충돌 회피)
+    try:
+        return load_model(path, compile=False)
+    except Exception as e1:
+        # 2) safe_mode=False + custom_objects (클래스/함수 탐색 허용)
+        try:
+            return load_model(path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS)
+        except Exception as e2:
+            # 3) 디버깅: 화면에 두 에러 모두 표출
+            st.error(f"load_model 실패: {path}")
+            st.exception(e1)
+            st.exception(e2)
+            raise
 # =======================
 # 모델 로드
 # =======================
