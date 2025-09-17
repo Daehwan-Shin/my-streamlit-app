@@ -31,7 +31,7 @@ def robust_load(path: str):
 # =======================
 # 모델 로드
 # =======================
-@st.cache_resource
+#@st.cache_resource
 def load_trained_model(model_name):
     if model_name == "DenseNet201":
         return load_model("models/densenet201_3class_v3.keras"), (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
