@@ -5,6 +5,10 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 
+# NEW: standalone Keras
+import keras
+from keras.saving import load_model as ks_load_model
+
 st.set_page_config(page_title="OCT AI Demo", layout="wide")
 
 # Keras3에서 자주 필요한(혹은 누락되는) 객체들 매핑
