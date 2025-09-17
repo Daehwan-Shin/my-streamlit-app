@@ -6,4 +6,3 @@ tensorflow==2.15.0
 keras==2.15.0
 h5py==3.9.0
 opencv-python-headless==4.8.1.78
-
