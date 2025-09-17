@@ -2,5 +2,5 @@ streamlit
 numpy
 pandas
 scikit-learn
-tensorflow==2.15.0
+tensorflow==2.20.0
 opencv-python-headless
