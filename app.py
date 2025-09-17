@@ -13,9 +13,9 @@ st.set_page_config(page_title="OCT AI Demo", layout="wide")
 @st.cache_resource
 def load_trained_model(model_name):
     if model_name == "DenseNet201":
-        return load_model("models/densenet201_3class.h5"), (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
+        return load_model("models/densenet201_3class_tf"), (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
     else:
-        return load_model("models/efficientnetb4_3class.h5"), (380, 380), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
+        return load_model("models/efficientnetb4_3class_tf"), (380, 380), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
 
 # =======================
 # Grad-CAM
