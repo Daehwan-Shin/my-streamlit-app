@@ -16,29 +16,23 @@ CUSTOM_OBJECTS = {
     "swish": tf.nn.swish, "Swish": tf.nn.swish,
     "gelu": tf.nn.gelu,
     "relu6": tf.nn.relu6,
-    # 옛 efficientnet 구현에서 등장하던 이름들 대체
     "FixedDropout": tf.keras.layers.Dropout,
     "DepthwiseConv2D": tf.keras.layers.DepthwiseConv2D,
 }
 
 def robust_load(path: str):
-    # custom_object_scope로 한 번 더 안전망 제공
-    with tf.keras.utils.custom_object_scope(CUSTOM_OBJECTS):
+    # standalone keras 로더 우선
+    with keras.utils.custom_object_scope(CUSTOM_OBJECTS):
         try:
-            # 1) 가장 기본: compile=False 로드
-            return load_model(path, compile=False)
+            return ks_load_model(path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS)
         except Exception as e1:
+            # fallback: tf.keras 로더
             try:
-                # 2) safe_mode=False + custom_objects (레거시/커스텀 허용)
-                return load_model(
-                    path,
-                    compile=False,
-                    safe_mode=False,
-                    custom_objects=CUSTOM_OBJECTS,
+                return tf.keras.models.load_model(
+                    path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS
                 )
             except Exception as e2:
                 st.error(f"load_model 실패: {path}")
-                st.write("아래 에러에서 **모르는 클래스/함수 이름**을 확인해 CUSTOM_OBJECTS에 추가하세요.")
                 st.exception(e1)
                 st.exception(e2)
                 raise
