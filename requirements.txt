@@ -1,8 +1,9 @@
-streamlit
-numpy
-pandas
-scikit-learn
-tensorflow==2.20.0
-keras==3.6.0
-h5py
-opencv-python-headless
+streamlit==1.28.0
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.2.2
+tensorflow==2.15.0
+keras==2.15.0
+h5py==3.9.0
+opencv-python-headless==4.8.1.78
+

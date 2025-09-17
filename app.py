@@ -1,66 +1,18 @@
 import streamlit as st
 import numpy as np
 import cv2
-import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 
-# NEW: standalone Keras
-import keras
-from keras.saving import load_model as ks_load_model
-
 st.set_page_config(page_title="OCT AI Demo", layout="wide")
 
-# Keras3에서 자주 필요한(혹은 누락되는) 객체들 매핑
-CUSTOM_OBJECTS = {
-    # activation functions
-    "swish": tf.nn.swish, "Swish": tf.nn.swish,
-    "gelu": tf.nn.gelu,
-    "relu6": tf.nn.relu6,
-
-    # common layers
-    "Conv2D": tf.keras.layers.Conv2D,
-    "BatchNormalization": tf.keras.layers.BatchNormalization,
-    "Activation": tf.keras.layers.Activation,
-    "MaxPooling2D": tf.keras.layers.MaxPooling2D,
-    "GlobalAveragePooling2D": tf.keras.layers.GlobalAveragePooling2D,
-    "Dense": tf.keras.layers.Dense,
-    "Dropout": tf.keras.layers.Dropout,
-
-    # efficientnet-specific / legacy
-    "FixedDropout": tf.keras.layers.Dropout,
-    "DepthwiseConv2D": tf.keras.layers.DepthwiseConv2D,
-    "Functional": tf.keras.Model
-}
-
-def robust_load(path: str):
-    # standalone keras 로더 우선
-    with keras.utils.custom_object_scope(CUSTOM_OBJECTS):
-        try:
-            return ks_load_model(path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS)
-        except Exception as e1:
-            # fallback: tf.keras 로더
-            try:
-                return tf.keras.models.load_model(
-                    path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS
-                )
-            except Exception as e2:
-                st.error(f"load_model 실패: {path}")
-                st.exception(e1)
-                st.exception(e2)
-                raise
-
-# =======================
-# 모델 로드
-# =======================
-# 디버깅 중엔 캐시를 잠시 끄고 원인 파악 → 안정화 후 @st.cache_resource 다시 켜기
-# @st.cache_resource
+@st.cache_resource
 def load_trained_model(model_name):
     if model_name == "DenseNet201":
-        model = robust_load("models/densenet201_3class_v3.keras")   # 또는 *_tf 폴더
+        model = load_model("models/densenet201_3class.h5", compile=False)
         return model, (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
     else:
-        model = robust_load("models/efficientnetb4_3class_v3.keras")  # 또는 *_tf 폴더
+        model = load_model("models/efficientnetb4_3class.h5", compile=False)
         return model, (380, 380), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
 
 # =======================
