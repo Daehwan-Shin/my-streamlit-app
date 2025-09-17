@@ -3,4 +3,6 @@ numpy
 pandas
 scikit-learn
 tensorflow==2.20.0
+keras==3.6.0
+h5py
 opencv-python-headless
