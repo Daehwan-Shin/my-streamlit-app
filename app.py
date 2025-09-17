@@ -13,11 +13,24 @@ st.set_page_config(page_title="OCT AI Demo", layout="wide")
 
 # Keras3에서 자주 필요한(혹은 누락되는) 객체들 매핑
 CUSTOM_OBJECTS = {
+    # activation functions
     "swish": tf.nn.swish, "Swish": tf.nn.swish,
     "gelu": tf.nn.gelu,
     "relu6": tf.nn.relu6,
+
+    # common layers
+    "Conv2D": tf.keras.layers.Conv2D,
+    "BatchNormalization": tf.keras.layers.BatchNormalization,
+    "Activation": tf.keras.layers.Activation,
+    "MaxPooling2D": tf.keras.layers.MaxPooling2D,
+    "GlobalAveragePooling2D": tf.keras.layers.GlobalAveragePooling2D,
+    "Dense": tf.keras.layers.Dense,
+    "Dropout": tf.keras.layers.Dropout,
+
+    # efficientnet-specific / legacy
     "FixedDropout": tf.keras.layers.Dropout,
     "DepthwiseConv2D": tf.keras.layers.DepthwiseConv2D,
+    "Functional": tf.keras.Model
 }
 
 def robust_load(path: str):
