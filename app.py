@@ -7,36 +7,50 @@ from tensorflow.keras.preprocessing.image import img_to_array
 
 st.set_page_config(page_title="OCT AI Demo", layout="wide")
 
-# Keras3에서 자주 필요한 커스텀 객체들 (필요시 여기에 계속 추가)
+# Keras3에서 자주 필요한(혹은 누락되는) 객체들 매핑
 CUSTOM_OBJECTS = {
-    "swish": tf.nn.swish,          # EfficientNet 계열에서 흔함
-    "gelu": tf.nn.gelu,            # 일부 모델에서 사용
-    "FixedDropout": tf.keras.layers.Dropout,  # 옛 efficientnet에서 쓰던 래퍼 대체
+    "swish": tf.nn.swish, "Swish": tf.nn.swish,
+    "gelu": tf.nn.gelu,
+    "relu6": tf.nn.relu6,
+    # 옛 efficientnet 구현에서 등장하던 이름들 대체
+    "FixedDropout": tf.keras.layers.Dropout,
+    "DepthwiseConv2D": tf.keras.layers.DepthwiseConv2D,
 }
 
 def robust_load(path: str):
-    # 1) 가장 기본: compile=False (옵티마/손실 직렬화 충돌 회피)
-    try:
-        return load_model(path, compile=False)
-    except Exception as e1:
-        # 2) safe_mode=False + custom_objects (클래스/함수 탐색 허용)
+    # custom_object_scope로 한 번 더 안전망 제공
+    with tf.keras.utils.custom_object_scope(CUSTOM_OBJECTS):
         try:
-            return load_model(path, compile=False, safe_mode=False, custom_objects=CUSTOM_OBJECTS)
-        except Exception as e2:
-            # 3) 디버깅: 화면에 두 에러 모두 표출
-            st.error(f"load_model 실패: {path}")
-            st.exception(e1)
-            st.exception(e2)
-            raise
+            # 1) 가장 기본: compile=False 로드
+            return load_model(path, compile=False)
+        except Exception as e1:
+            try:
+                # 2) safe_mode=False + custom_objects (레거시/커스텀 허용)
+                return load_model(
+                    path,
+                    compile=False,
+                    safe_mode=False,
+                    custom_objects=CUSTOM_OBJECTS,
+                )
+            except Exception as e2:
+                st.error(f"load_model 실패: {path}")
+                st.write("아래 에러에서 **모르는 클래스/함수 이름**을 확인해 CUSTOM_OBJECTS에 추가하세요.")
+                st.exception(e1)
+                st.exception(e2)
+                raise
+
 # =======================
 # 모델 로드
 # =======================
-#@st.cache_resource
+# 디버깅 중엔 캐시를 잠시 끄고 원인 파악 → 안정화 후 @st.cache_resource 다시 켜기
+# @st.cache_resource
 def load_trained_model(model_name):
     if model_name == "DenseNet201":
-        return load_model("models/densenet201_3class_v3.keras"), (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
+        model = robust_load("models/densenet201_3class_v3.keras")   # 또는 *_tf 폴더
+        return model, (224, 224), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
     else:
-        return load_model("models/efficientnetb4_3class_v3.keras"), (380, 380), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
+        model = robust_load("models/efficientnetb4_3class_v3.keras")  # 또는 *_tf 폴더
+        return model, (380, 380), ["CNV / Wet AMD", "DRUSEN", "NORMAL"]
 
 # =======================
 # Grad-CAM
