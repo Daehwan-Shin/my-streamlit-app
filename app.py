@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import cv2
+import tensorflow as tf   # ✅ 추가: TensorFlow 전체를 tf라는 이름으로 사용
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 
