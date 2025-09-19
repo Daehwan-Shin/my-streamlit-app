@@ -107,6 +107,17 @@ if uploaded_file:
 
     st.metric("Prediction", f"{label}", f"{prob:.2f}")
 
+    # 확률 분포 시각화
+    import pandas as pd
+    probs = pred[0]
+    df = pd.DataFrame({
+        "class": class_labels,
+        "probability": probs
+    })
+    st.subheader("Class Probabilities")
+    st.dataframe(df)
+    st.bar_chart(df.set_index("class"))
+    
     # Grad-CAM
     st.subheader("Grad-CAM Visualization")
     gradcam = GradCAM(model, last_conv_layer)
