@@ -18,7 +18,7 @@ def load_trained_model(model_name):
     if model_name == "DenseNet201":
         model_path = hf_hub_download(
             repo_id=repo_id,
-            filename="densenet201_finetune_best.h5"  # 허깅페이스에 업로드한 파일명
+            filename="densenet201_4class_finetune_opt_best.h5"  # 허깅페이스에 업로드한 파일명
         )
         model = load_model(model_path, compile=False)
         return model, (224, 224), ["CNV / Wet AMD", "DME", "DRUSEN", "NORMAL"]
@@ -26,7 +26,7 @@ def load_trained_model(model_name):
     else:  # EfficientNet-B4
         model_path = hf_hub_download(
             repo_id=repo_id,
-            filename="efficientnetb4_finetune_best.h5"
+            filename="efficientnetb4_4class_finetune_opt_best.h5"
         )
         model = load_model(model_path, compile=False)
         return model, (380, 380), ["CNV / Wet AMD", "DME", "DRUSEN", "NORMAL"]
