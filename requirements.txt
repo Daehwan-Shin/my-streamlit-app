@@ -5,3 +5,4 @@ h5py==3.9.0
 opencv-python-headless
 # 만약 NumPy 충돌 메시지 보이면 아래 한 줄 추가
 # numpy<2
+huggingface_hub
