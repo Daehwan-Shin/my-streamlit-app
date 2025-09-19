@@ -12,6 +12,7 @@ st.set_page_config(page_title="OCT AI Demo", layout="wide")
 # =======================
 # Load Trained Model
 # =======================
+@st.cache_resource
 def load_trained_model(model_name):
     repo_id = "Daehwan-shin/oct-ai-models"
 
@@ -103,17 +104,13 @@ class XAIVisualizer:
 # Streamlit UI
 # =======================
 st.title("🖥️ OCT Image AI Demo (4-Class)")
-st.write("DenseNet201 vs EfficientNet-B4 기반 OCT 분류 (CNV / DME / DRUSEN / NORMAL) + Grad-CAM/Grad-CAM++")
+st.write("DenseNet201 vs EfficientNet-B4 기반 OCT 분류 (CNV / DME / DRUSEN / NORMAL) + Grad-CAM / Grad-CAM++")
 
 model_choice = st.selectbox("모델 선택", ["DenseNet201", "EfficientNet-B4"])
+model, img_size, class_labels, last_conv_layer = load_trained_model(model_choice)
 
 uploaded_file = st.file_uploader("OCT 이미지 업로드", type=["jpg", "jpeg", "png"])
-
 if uploaded_file:
-    # 👉 모델은 여기서 로드 (Lazy Loading)
-    with st.spinner("🔄 모델 불러오는 중..."):
-        model, img_size, class_labels, last_conv_layer = load_trained_model(model_choice)
-
     # Load image
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, 1)
@@ -152,16 +149,24 @@ if uploaded_file:
     # Grad-CAM & Grad-CAM++
     st.subheader("Explainability Visualization")
     xai = XAIVisualizer(model, last_conv_layer)
-    heatmap_cam = xai.gradcam(image_arr, class_idx=class_idx)
-    heatmap_campp = xai.gradcam_plus_plus(image_arr, class_idx=class_idx)
 
+    # Always run Grad-CAM
+    heatmap_cam = xai.gradcam(image_arr, class_idx=class_idx)
     overlay_cam = xai.overlay_heatmap(heatmap_cam, image)
-    overlay_campp = xai.overlay_heatmap(heatmap_campp, image)
+
+    # Grad-CAM++ only if user requests
+    show_gradcampp = st.checkbox("Enable Grad-CAM++ (slower, more memory)", value=False)
+    overlay_campp = None
+    if show_gradcampp:
+        with st.spinner("Grad-CAM++ 계산 중... ⏳"):
+            heatmap_campp = xai.gradcam_plus_plus(image_arr, class_idx=class_idx)
+            overlay_campp = xai.overlay_heatmap(heatmap_campp, image)
 
     col1, col2, col3 = st.columns(3)
     with col1:
         st.image(image, caption="Original OCT", width="stretch")
     with col2:
         st.image(overlay_cam, caption=f"Grad-CAM ({label})", width="stretch")
-    with col3:
-        st.image(overlay_campp, caption=f"Grad-CAM++ ({label})", width="stretch")
+    if overlay_campp is not None:
+        with col3:
+            st.image(overlay_campp, caption=f"Grad-CAM++ ({label})", width="stretch")
