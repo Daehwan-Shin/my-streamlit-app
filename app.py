@@ -19,7 +19,7 @@ def load_trained_model(model_name):
     if model_name == "DenseNet201":
         model_path = hf_hub_download(
             repo_id=repo_id,
-            filename="densenet201_4class_finetune_opt_best.h5"
+            filename="densenet201_4class_finetune_cnv_ver_3_best.h5"
         )
         model = load_model(model_path, compile=False)
         return model, (224, 224), ["CNV / Wet AMD", "DME", "DRUSEN", "NORMAL"], "conv5_block32_concat"
@@ -27,7 +27,7 @@ def load_trained_model(model_name):
     else:  # EfficientNet-B4
         model_path = hf_hub_download(
             repo_id=repo_id,
-            filename="efficientnetb4_4class_finetune_opt_best.h5"
+            filename="efficientnetb4_4class_finetune_cnvC_best.h5"
         )
         model = load_model(model_path, compile=False)
         return model, (380, 380), ["CNV / Wet AMD", "DME", "DRUSEN", "NORMAL"], "top_conv"
