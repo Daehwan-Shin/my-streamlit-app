@@ -32,7 +32,7 @@ def load_trained_model(model_name: str):
     if model_name == "DenseNet201":
         model_path = hf_hub_download(
             repo_id=repo_id,
-            filename="densenet201_4class_finetune_cnv_ver_3_best.h5"
+            filename="densenet201_4class_finetune_cnvC_best.h5"
         )
         model = load_model(model_path, compile=False)
         input_size = (224, 224)
